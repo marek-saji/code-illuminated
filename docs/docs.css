@@ -1,6 +1,5 @@
 body {
     font-family: palatino, palatino linotype, georgia, serif;
-    font-size: 10pt;
     text-align: center;
 }
 
@@ -52,7 +51,7 @@ body {
     font-family: monaco, consolas, andale mono, monospace;
     float: left;
     white-space: pre;
-    font-size: 6pt;
+    font-size: 60%;
     background-color: #f0f0f0;
 }
 
