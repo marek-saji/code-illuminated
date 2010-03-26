@@ -41,6 +41,7 @@
 // navigate through and read the documentation.
 
 var App = {
+  options : {}
 };
 
 // ** {{{ App.trim() }}} **
@@ -111,7 +112,7 @@ App.processCode = function processCode(code, div) {
         }
       }
       if (isCode)
-        codeText += line + "\r\n";
+        codeText += lineNum + "| " +line + "\r\n";
     });
   maybeAppendBlock();
 
