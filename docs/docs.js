@@ -270,13 +270,12 @@ App.initColumnSizes = function initSizes() {
   $(".code").css(App.columnCss);
 };
 
-$(window).ready(
-  function() {
-    App.pages["overview"] = $("#overview").get(0);
-    App.initColumnSizes();
-    window.setInterval(
-      function() { App.navigate(); },
-      100
-    );
-    App.navigate();
-  });
+$(function() {
+  App.pages["overview"] = $("#overview").get(0);
+  App.initColumnSizes();
+  window.setInterval(
+    function() { App.navigate(); },
+    100
+  );
+  App.navigate();
+});
