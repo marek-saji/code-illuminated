@@ -143,7 +143,7 @@ App.processCode = function processCode(code, div) {
       $(docs).css(App.columnCss);
       creole.parse(docs.get(0), this.text);
       $(div).append(docs);
-      var code = $('<div class="code">');
+      var code = $('<code class="code prettyprint">');
       $(code).css(App.columnCss);
       code.text(this.code);
       $(div).append(code);
@@ -251,7 +251,9 @@ App.navigate = function navigate() {
       App.pages[newPage] = newDiv;
       jQuery.get(newPage,
                  {},
-                 function(code) { App.processCode(code, newDiv); },
+                 function(code) { 
+                   App.processCode(code, newDiv);
+                   prettyPrint();},
                  "text");
     }
     $(App.pages[newPage]).show();
@@ -281,11 +283,15 @@ App.initColumnSizes = function initSizes() {
 };
 
 $(function() {
-  App.pages["overview"] = $("#overview").get(0);
-  App.initColumnSizes();
-  window.setInterval(
-    function() { App.navigate(); },
-    100
-   );
-  App.navigate();
+  $.getScript('scripts/prettify.js', function(success){
+    App.pages["overview"] = $("#overview").get(0);
+    App.initColumnSizes();
+    window.setInterval(
+      function() {
+        App.navigate();
+        },
+      100
+     );
+    App.navigate();
+  });
 });

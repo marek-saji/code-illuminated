@@ -51,7 +51,7 @@ body {
     font-family: monaco, consolas, andale mono, monospace;
     float: left;
     white-space: pre;
-    font-size: 60%;
+    font-size: 65%;
     background-color: #f0f0f0;
 }
 
@@ -60,3 +60,16 @@ body {
     height: 0;
     line-height: 0;
 }
+
+/* Prettify */
+.str { color: #800; }
+.kwd { color: #008; }
+.com { color: #080; font-style:italic;}
+.typ { color: #606; }
+.lit { color: #066; }
+.pun { color: #660; }
+.pln { color: #000; }
+.tag { color: #008; }
+.atn { color: #606; }
+.atv { color: #080; }
+.dec { color: #606; }
