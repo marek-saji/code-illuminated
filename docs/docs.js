@@ -87,11 +87,13 @@ App.processCode = function processCode(code, div) {
       blocks.push({text: blockText,
                    lineno: firstCommentLine,
                    numLines: lastCommentLine - firstCommentLine + 1,
+                   lastCode : _lineNum,
                    code: codeText});
     } else if(codeText){
       blocks.push({text: "~ ",
                    lineno: 0,
-                   numLines: _lineNum,
+                   numLines: 0,
+                   lastCode : _lineNum,
                    code: codeText});
     
     }
@@ -122,7 +124,7 @@ App.processCode = function processCode(code, div) {
         }
       }
       if (isCode)
-        codeText += lineNum + "| " +line + "\r\n";
+        codeText += line + "\r\n";
     });
   maybeAppendBlock();
 
@@ -143,15 +145,22 @@ App.processCode = function processCode(code, div) {
       $(docs).css(App.columnCss);
       creole.parse(docs.get(0), this.text);
       $(div).append(docs);
+      var num = $('<div class = "nums">');
+      console.log(this.lineno + this.numLines, this.lastCode)
+      for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
+        num.append(x + '\n');
+      }
+      $(div).append(num);
       var code = $('<code class="code prettyprint">');
       $(code).css(App.columnCss);
       code.text(this.code);
       $(div).append(code);
 
       var docsSurplus = docs.height() - code.height() + 1;
-      if (docsSurplus > 0)
+      if (docsSurplus > 0){
         code.css({paddingBottom: docsSurplus + "px"});
-
+        num.css({paddingBottom: docsSurplus + "px"})
+      }
       $(div).append('<div class="divider">');
     });
 
@@ -277,9 +286,10 @@ App.initColumnSizes = function initSizes() {
   App.columnCss = {width: App.columnWidth,
                    paddingLeft: padding,
                    paddingRight: padding};
-  $("#content").css({width: (App.columnWidth + padding*2) * 2});
+  $("#content").css({width: (App.columnWidth + padding*2) * 2 + (3*App.charWidth)});
   $(".documentation").css(App.columnCss);
   $(".code").css(App.columnCss);
+  $(".nums").css({width : 3*App.charWidth});
 };
 
 $(function() {

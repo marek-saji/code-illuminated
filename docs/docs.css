@@ -47,11 +47,20 @@ body {
     line-height: 1.4em;
 }
 
+.nums{
+    font-family: consolas, monaco, andale mono, monospace;
+    float:left;
+    white-space: pre;
+    font-size: 70%;
+    background-color: #d0d0d0;
+    margin:0;
+    color:#999;
+}
 .code {
-    font-family: monaco, consolas, andale mono, monospace;
+    font-family: consolas, monaco, andale mono, monospace;
     float: left;
     white-space: pre;
-    font-size: 65%;
+    font-size: 70%;
     background-color: #f0f0f0;
 }
 
@@ -63,10 +72,10 @@ body {
 
 /* Prettify */
 .str { color: #800; }
-.kwd { color: #008; }
+.kwd { color: #b08; }
 .com { color: #080; font-style:italic;}
-.typ { color: #606; }
-.lit { color: #066; }
+.typ { color: #000; }
+.lit { color: #00f; }
 .pun { color: #660; }
 .pln { color: #000; }
 .tag { color: #008; }
