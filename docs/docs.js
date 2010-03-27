@@ -80,18 +80,28 @@ App.processCode = function processCode(code, div) {
   var codeText = "";
   var firstCommentLine;
   var lastCommentLine;
+  var _lineNum;
 
   function maybeAppendBlock() {
-    if (blockText)
+    if (blockText){
       blocks.push({text: blockText,
                    lineno: firstCommentLine,
                    numLines: lastCommentLine - firstCommentLine + 1,
                    code: codeText});
+    } else if(codeText){
+      blocks.push({text: "~ ",
+                   lineno: 0,
+                   numLines: _lineNum,
+                   code: codeText});
+    
+    }
+                    
   }
 
   jQuery.each(
     lines,
     function(lineNum) {
+      _lineNum = lineNum;
       var line = this;
       var isCode = true;
       var isComment = (App.trim(line).indexOf("//") == 0);
@@ -276,6 +286,6 @@ $(function() {
   window.setInterval(
     function() { App.navigate(); },
     100
-  );
+   );
   App.navigate();
 });
