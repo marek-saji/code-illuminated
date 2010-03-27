@@ -185,7 +185,9 @@ App.processCode = function processCode(code, div) {
   // == Table Of Contents ==
   var ul = $("<ul class = 'toc' />");
   for (var k in cont){
-    var ln = $("<li class = '" + cont[k][1] + "'><span class = 'pseudo-link' href = '" + cont[k][0] + "'>" + cont[k][2].text() + "</span></li>");
+    var ln = $("<li class = '" + cont[k][1] + "'>" +
+      "<span class = 'pseudo-link' href = '" + cont[k][0] +
+      "'>" + cont[k][2].text() + "</span></li>");
     ul.append(ln);
   }
   div.prepend(ul);
