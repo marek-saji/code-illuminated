@@ -137,16 +137,27 @@ App.processCode = function processCode(code, div) {
       },
       linkFormat: ''
     });
-
+  
+  var cont = [];
+  var headers = ['h1', 'h2', 'h3', 'h4', "strong"];
+  
   jQuery.each(
     blocks,
     function(i) {
       var docs = $('<div class="documentation">');
-      $(docs).css(App.columnCss);
+      docs.css(App.columnCss);
       creole.parse(docs.get(0), this.text);
+      
+      for(var h in headers){
+        var hd = headers[h];
+        if (docs.find(hd).length > 0){
+          var titl = docs.find(hd)
+          titl.attr('id', titl.text().replace(" ", "_"));
+          cont.push([titl.attr('id'), hd, titl]);
+        }
+      }
       $(div).append(docs);
       var num = $('<div class = "nums">');
-      console.log(this.lineno + this.numLines, this.lastCode)
       for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
         num.append(x + '\n');
       }
@@ -170,6 +181,15 @@ App.processCode = function processCode(code, div) {
     function(i) {
       App.processors[i]($(div).find(".documentation"));
     });
+    
+  // == Table Of Contents ==
+  var ul = $("<ul class = 'toc' />");
+  for (var k in cont){
+    var ln = $("<li class = '" + cont[k][1] + "'><span class = 'pseudo-link' href = '" + cont[k][0] + "'>" + cont[k][2].text() + "</span></li>");
+    ul.append(ln);
+  }
+  div.prepend(ul);
+     
 };
 
 // ** {{{ App.addMenuItem() }}} **
@@ -293,6 +313,9 @@ App.initColumnSizes = function initSizes() {
 };
 
 $(function() {
+  $('.pseudo-link').live('click', function(){
+    console.log(this);
+  });
   $.getScript('scripts/prettify.js', function(success){
     App.pages["overview"] = $("#overview").get(0);
     App.initColumnSizes();
