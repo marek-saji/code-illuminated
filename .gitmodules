@@ -1,0 +1,3 @@
+[submodule "vendor/showdown"]
+	path = vendor/showdown
+	url = https://github.com/coreyti/showdown.git
