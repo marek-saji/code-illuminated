@@ -128,15 +128,7 @@ App.processCode = function processCode(code, div) {
     });
   maybeAppendBlock();
 
-  var creole = new Parse.Simple.Creole(
-    {
-      forIE: document.all,
-      interwiki: {
-        WikiCreole: 'http://www.wikicreole.org/wiki/',
-        Wikipedia: 'http://en.wikipedia.org/wiki/'
-      },
-      linkFormat: ''
-    });
+  var showdown = new Showdown.converter();
   
   var cont = [];
   var headers = ['h1', 'h2', 'h3', 'h4', "strong"];
@@ -146,7 +138,7 @@ App.processCode = function processCode(code, div) {
     function(i) {
       var docs = $('<div class="documentation">');
       docs.css(App.columnCss);
-      creole.parse(docs.get(0), this.text);
+		docs.html(showdown.makeHtml(this.text));
       
       for(var h in headers){
         var hd = headers[h];
