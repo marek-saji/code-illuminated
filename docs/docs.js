@@ -20,6 +20,7 @@
  * Contributor(s):
  *   Atul Varma <atul@mozilla.com>
  *   Sander Dijkhuis <sander.dijkhuis@gmail.com>
+ *   Stefan Thomas <justmoon@members.fsf.org>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -41,7 +42,7 @@
 // navigate through and read the documentation.
 
 var App = {
-  options : {}
+	options : {}
 };
 
 // ** {{{ App.trim() }}} **
@@ -49,7 +50,7 @@ var App = {
 // Returns {{{str}}} without whitespace at the beginning and the end.
 
 App.trim = function trim(str) {
-  return str.replace(/^\s+|\s+$/g,"");
+	return str.replace(/^\s+|\s+$/g,"");
 };
 
 // ** {{{ App.processors }}} **
@@ -74,116 +75,115 @@ App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
 // Documentation is parsed using [[http://wikicreole.org/|Creole]].
 
 App.processCode = function processCode(code, div) {
-  var lines = code.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
-  var blocks = [];
-  var blockText = "";
-  var codeText = "";
-  var firstCommentLine;
-  var lastCommentLine;
-  var _lineNum;
+	var lines = code.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+	var blocks = [];
+	var blockText = "";
+	var codeText = "";
+	var firstCommentLine;
+	var lastCommentLine;
+	var _lineNum;
 
-  function maybeAppendBlock() {
-    if (blockText){
-      blocks.push({text: blockText,
-                   lineno: firstCommentLine,
-                   numLines: lastCommentLine - firstCommentLine + 1,
-                   lastCode : _lineNum,
-                   code: codeText});
-    } else if(codeText){
-      blocks.push({text: "~ ",
-                   lineno: 0,
-                   numLines: 0,
-                   lastCode : _lineNum,
-                   code: codeText});
-    
-    }
-                    
-  }
+	function maybeAppendBlock() {
+		if (blockText){
+			blocks.push({text: blockText,
+						 lineno: firstCommentLine,
+						 numLines: lastCommentLine - firstCommentLine + 1,
+						 lastCode : _lineNum,
+						 code: codeText});
+		} else if(codeText){
+			blocks.push({text: "~ ",
+						 lineno: 0,
+						 numLines: 0,
+						 lastCode : _lineNum,
+						 code: codeText});
 
-  jQuery.each(
-    lines,
-    function(lineNum) {
-      _lineNum = lineNum;
-      var line = this;
-      var isCode = true;
-      var isComment = (App.trim(line).indexOf("//") == 0);
-      if (isComment) {
-        var startIndex = line.indexOf("//");
-        var text = App.trim(line.slice(startIndex + 3));
-        if (lineNum == lastCommentLine + 1) {
-          blockText += text + "\n";
-          lastCommentLine += 1;
-          isCode = false;
-        } else if (text.charAt(0) == "=" || text.charAt(0) == "*") {
-          maybeAppendBlock();
-          firstCommentLine = lineNum;
-          lastCommentLine = lineNum;
-          blockText = text + "\n";
-          codeText = "";
-          isCode = false;
-        }
-      }
-      if (isCode)
-        codeText += line + "\r\n";
-    });
-  maybeAppendBlock();
+		}
+	}
 
-  var showdown = new Showdown.converter();
-  
-  var cont = [];
-  var headers = ['h1', 'h2', 'h3', 'h4', "strong"];
-  
-  jQuery.each(
-    blocks,
-    function(i) {
-      var docs = $('<div class="documentation">');
-      docs.css(App.columnCss);
-		docs.html(showdown.makeHtml(this.text));
-      
-      for(var h in headers){
-        var hd = headers[h];
-        if (docs.find(hd).length > 0){
-          var titl = docs.find(hd)
-          titl.attr('id', titl.text().replace(" ", "_"));
-          cont.push([titl.attr('id'), hd, titl]);
-        }
-      }
-      $(div).append(docs);
-      var num = $('<div class = "nums">');
-      for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
-        num.append(x + '\n');
-      }
-      $(div).append(num);
-      var code = $('<code class="code prettyprint">');
-      $(code).css(App.columnCss);
-      code.text(this.code);
-      $(div).append(code);
+	jQuery.each(
+		lines,
+		function(lineNum) {
+			_lineNum = lineNum;
+			var line = this;
+			var isCode = true;
+			var isComment = (App.trim(line).indexOf("//") == 0);
+			if (isComment) {
+				var startIndex = line.indexOf("//");
+				var text = App.trim(line.slice(startIndex + 3));
+				if (lineNum == lastCommentLine + 1) {
+					blockText += text + "\n";
+					lastCommentLine += 1;
+					isCode = false;
+				} else if (text.charAt(0) == "=" || text.charAt(0) == "*") {
+					maybeAppendBlock();
+					firstCommentLine = lineNum;
+					lastCommentLine = lineNum;
+					blockText = text + "\n";
+					codeText = "";
+					isCode = false;
+				}
+			}
+			if (isCode)
+				codeText += line + "\r\n";
+		});
+	maybeAppendBlock();
 
-      var docsSurplus = docs.height() - code.height() + 1;
-      if (docsSurplus > 0){
-        code.css({paddingBottom: docsSurplus + "px"});
-        num.css({paddingBottom: docsSurplus + "px"})
-      }
-      $(div).append('<div class="divider">');
-    });
+	var showdown = new Showdown.converter();
 
-  // Run the user-defined processors.
-  jQuery.each(
-    App.processors,
-    function(i) {
-      App.processors[i]($(div).find(".documentation"));
-    });
-    
-  // == Table Of Contents ==
-  var ul = $("<ul class = 'toc' />");
-  for (var k in cont){
-    var ln = $("<li class = '" + cont[k][1] + "'>" +
-      "<span class = 'pseudo-link' href = '" + cont[k][0] +
-      "'>" + cont[k][2].text() + "</span></li>");
-    ul.append(ln);
-  }
-  div.prepend(ul);
-     
+	var cont = [];
+	var headers = ['h1', 'h2', 'h3', 'h4', "strong"];
+
+	jQuery.each(
+		blocks,
+		function(i) {
+			var docs = $('<div class="documentation">');
+			docs.css(App.columnCss);
+			docs.html(showdown.makeHtml(this.text));
+
+			for(var h in headers){
+				var hd = headers[h];
+				if (docs.find(hd).length > 0){
+					var titl = docs.find(hd)
+					titl.attr('id', titl.text().replace(" ", "_"));
+					cont.push([titl.attr('id'), hd, titl]);
+				}
+			}
+			$(div).append(docs);
+			var num = $('<div class = "nums">');
+			for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
+				num.append(x + '\n');
+			}
+			$(div).append(num);
+			var code = $('<code class="code prettyprint">');
+			$(code).css(App.columnCss);
+			code.text(this.code);
+			$(div).append(code);
+
+			var docsSurplus = docs.height() - code.height() + 1;
+			if (docsSurplus > 0){
+				code.css({paddingBottom: docsSurplus + "px"});
+				num.css({paddingBottom: docsSurplus + "px"})
+			}
+			$(div).append('<div class="divider">');
+		});
+
+	// Run the user-defined processors.
+	jQuery.each(
+		App.processors,
+		function(i) {
+			App.processors[i]($(div).find(".documentation"));
+		});
+
+	// == Table Of Contents ==
+	var ul = $("<ul class = 'toc' />");
+	for (var k in cont){
+		var ln = $("<li class = '" + cont[k][1] + "'>" +
+				   "<span class = 'pseudo-link' href = '" + cont[k][0] +
+				   "'>" + cont[k][2].text() + "</span></li>");
+		ul.append(ln);
+	}
+	div.prepend(ul);
+
 };
 
 // ** {{{ App.addMenuItem() }}} **
@@ -196,55 +196,55 @@ App.processCode = function processCode(code, div) {
 // If the node does not have a menu yet, one will be created.
 
 App.addMenuItem = function addMenuItem(element, label, urlOrCallback) {
-  var text = $(element).text();
+	var text = $(element).text();
 
-  if (!$(element).parent().hasClass("popup-enabled")) {
-    App.menuItems[text] = [];
+	if (!$(element).parent().hasClass("popup-enabled")) {
+		App.menuItems[text] = [];
 
-    $(element).wrap('<span class="popup-enabled"></span>');
+		$(element).wrap('<span class="popup-enabled"></span>');
 
-    $(element).mousedown(
-      function(evt) {
-        evt.preventDefault();
-        var popup = $('<div class="popup"></div>');
+		$(element).mousedown(
+			function(evt) {
+				evt.preventDefault();
+				var popup = $('<div class="popup"></div>');
 
-        function addItemToPopup(label, urlOrCallback) {
-          var callback;
-          var menuItem = $('<div class="item"></div>');
-          menuItem.text(label);
-          function onOverOrOut() { $(this).toggleClass("selected"); }
-          menuItem.mouseover(onOverOrOut);
-          menuItem.mouseout(onOverOrOut);
-          if (typeof(urlOrCallback) == "string")
-            callback = function() {
-              window.open(urlOrCallback);
-            };
-          else
-            callback = urlOrCallback;
-          menuItem.mouseup(callback);
-          popup.append(menuItem);
-        }
+				function addItemToPopup(label, urlOrCallback) {
+					var callback;
+					var menuItem = $('<div class="item"></div>');
+					menuItem.text(label);
+					function onOverOrOut() { $(this).toggleClass("selected"); }
+					menuItem.mouseover(onOverOrOut);
+					menuItem.mouseout(onOverOrOut);
+					if (typeof(urlOrCallback) == "string")
+						callback = function() {
+							window.open(urlOrCallback);
+						};
+					else
+						callback = urlOrCallback;
+					menuItem.mouseup(callback);
+					popup.append(menuItem);
+				}
 
-        jQuery.each(
-          App.menuItems[text],
-          function(i) {
-            var item = App.menuItems[text][i];
-            addItemToPopup(item.label, item.urlOrCallback);
-          });
+				jQuery.each(
+					App.menuItems[text],
+					function(i) {
+						var item = App.menuItems[text][i];
+						addItemToPopup(item.label, item.urlOrCallback);
+					});
 
-        popup.find(".item:last").addClass("bottom");
+				popup.find(".item:last").addClass("bottom");
 
-        popup.css({left: evt.pageX + "px"});
-        $(window).mouseup(
-          function mouseup() {
-            popup.remove();
-            $(window).unbind("mouseup", mouseup);
-          });
-        $(this).append(popup);
-      });
-  }
+				popup.css({left: evt.pageX + "px"});
+				$(window).mouseup(
+					function mouseup() {
+						popup.remove();
+						$(window).unbind("mouseup", mouseup);
+					});
+				$(this).append(popup);
+			});
+	}
 
-  App.menuItems[text].push({ label: label, urlOrCallback: urlOrCallback });
+	App.menuItems[text].push({ label: label, urlOrCallback: urlOrCallback });
 };
 
 App.currentPage = null;
@@ -258,67 +258,65 @@ App.pages = {};
 // is shown.
 
 App.navigate = function navigate() {
-  var newPage;
-  if (window.location.hash)
-    newPage = window.location.hash.slice(1);
-  else
-    newPage = "overview";
+	var newPage;
+	if (window.location.hash)
+		newPage = window.location.hash.slice(1);
+	else
+		newPage = "overview";
 
-  if (App.currentPage != newPage) {
-    if (App.currentPage)
-      $(App.pages[App.currentPage]).hide();
-    if (!App.pages[newPage]) {
-      var newDiv = $("<div>");
-      newDiv.attr("name", newPage);
-      $("#content").append(newDiv);
-      App.pages[newPage] = newDiv;
-      jQuery.get(newPage,
-                 {},
-                 function(code) { 
-                   App.processCode(code, newDiv);
-                   prettyPrint();},
-                 "text");
-    }
-    $(App.pages[newPage]).show();
-    App.currentPage = newPage;
-  }
+	if (App.currentPage != newPage) {
+		if (App.currentPage)
+			$(App.pages[App.currentPage]).hide();
+		if (!App.pages[newPage]) {
+			var newDiv = $("<div>");
+			newDiv.attr("name", newPage);
+			$("#content").append(newDiv);
+			App.pages[newPage] = newDiv;
+			jQuery.get(newPage,
+					   {},
+					   function(code) {
+						   App.processCode(code, newDiv);
+						   prettyPrint();},
+					   "text");
+		}
+		$(App.pages[newPage]).show();
+		App.currentPage = newPage;
+	}
 };
 
 App.CHARS_PER_ROW = 80;
 
 App.initColumnSizes = function initSizes() {
-  // Get the width of a single monospaced character of code.
-  var oneCodeCharacter = $('<div class="code">M</div>');
-  $("#content").append(oneCodeCharacter);
-  App.charWidth = oneCodeCharacter.width();
-  App.columnWidth = App.charWidth * App.CHARS_PER_ROW;
-  $(oneCodeCharacter).remove();
+	// Get the width of a single monospaced character of code.
+	var oneCodeCharacter = $('<div class="code">M</div>');
+	$("#content").append(oneCodeCharacter);
+	App.charWidth = oneCodeCharacter.width();
+	App.columnWidth = App.charWidth * App.CHARS_PER_ROW;
+	$(oneCodeCharacter).remove();
 
-  // Dynamically determine the column widths and padding based on
-  // the font size.
-  var padding = App.charWidth * 2;
-  App.columnCss = {width: App.columnWidth,
-                   paddingLeft: padding,
-                   paddingRight: padding};
-  $("#content").css({width: (App.columnWidth + padding*2) * 2 + (3*App.charWidth)});
-  $(".documentation").css(App.columnCss);
-  $(".code").css(App.columnCss);
-  $(".nums").css({width : 3*App.charWidth});
+	// Dynamically determine the column widths and padding based on
+	// the font size.
+	var padding = App.charWidth * 2;
+	App.columnCss = {width: App.columnWidth,
+					 paddingLeft: padding,
+					 paddingRight: padding};
+	$("#content").css({width: (App.columnWidth + padding*2) * 2 + (3*App.charWidth)});
+	$(".documentation").css(App.columnCss);
+	$(".code").css(App.columnCss);
+	$(".nums").css({width : 3*App.charWidth});
 };
 
 $(function() {
-  $('.pseudo-link').live('click', function(){
-    console.log(this);
-  });
-  $.getScript('scripts/prettify.js', function(success){
-    App.pages["overview"] = $("#overview").get(0);
-    App.initColumnSizes();
-    window.setInterval(
-      function() {
-        App.navigate();
-        },
-      100
-     );
-    App.navigate();
-  });
+	$('.pseudo-link').live('click', function(){
+		console.log(this);
+	});
+	App.pages["overview"] = $("#overview").get(0);
+	App.initColumnSizes();
+	window.setInterval(
+		function() {
+			App.navigate();
+		},
+		100
+	);
+	App.navigate();
 });
