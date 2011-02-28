@@ -36,43 +36,51 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// = App =
-//
-// This is the application that processes the code and lets the user
-// navigate through and read the documentation.
+/**
+ * # App #
+ *
+ * This is the application that processes the code and lets the user
+ * navigate through and read the documentation.
+ */
 
 var App = {
 	options : {}
 };
 
-// ** {{{ App.trim() }}} **
-//
-// Returns {{{str}}} without whitespace at the beginning and the end.
+/**
+ * **`App.trim()`**
+ *
+ * Returns `str` without whitespace at the beginning and the end.
+ */
 
 App.trim = function trim(str) {
 	return str.replace(/^\s+|\s+$/g,"");
 };
 
-// ** {{{ App.processors }}} **
-//
-// An array of user-defined processor functions.  They should take one
-// argument, the DOM node containing the documentation.  User-defined
-// processor functions are called after standard processing is done.
+/**
+ * **`App.processors`**
+ *
+ * An array of user-defined processor functions.  They should take one
+ * argument, the DOM node containing the documentation.  User-defined
+ * processor functions are called after standard processing is done.
+ */
 
 App.processors = [];
 
 App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
 
-// ** {{{ App.processCode() }}} **
-//
-// Splits {{{code}}} in documented blocks and puts them in {{{div}}}.
-// The used structure for each block is:
-// {{{
-// <div class="documentation"> (...) </div>
-// <div class="code"> (...) </div>
-// <div class="divider"/>
-// }}}
-// Documentation is parsed using [[http://wikicreole.org/|Creole]].
+/**
+ * **`App.processCode()`**
+ *
+ * Splits `code` in documented blocks and puts them in `div`.
+ * The used structure for each block is:
+ *
+ *     <div class="documentation"> (...) </div>
+ *     <div class="code"> (...) </div>
+ *     <div class="divider"/>
+ *
+ * Documentation is parsed using [Showdown](https://github.com/coreyti/showdown).
+ */
 
 App.processCode = function processCode(code, div) {
 	var lines = code.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
@@ -100,28 +108,43 @@ App.processCode = function processCode(code, div) {
 		}
 	}
 
+	var inComment = false;
 	jQuery.each(
 		lines,
 		function(lineNum) {
+			var startIndex, text;
 			_lineNum = lineNum;
 			var line = this;
 			var isCode = true;
-			var isComment = (App.trim(line).indexOf("//") == 0);
-			if (isComment) {
-				var startIndex = line.indexOf("//");
-				var text = App.trim(line.slice(startIndex + 3));
-				if (lineNum == lastCommentLine + 1) {
+			var isStartComment = (App.trim(line).indexOf("/**") == 0);
+			console.log(line.indexOf("*/"));
+			var isEndComment = ~line.indexOf("*/");
+			if (inComment) {
+				text = App.trim(line);
+				if (text.charAt(0) == "*") {
+					text = text.slice(1);
+					if (text.charAt(0) == " ") text = text.slice(1);
+				}
+				if (isEndComment) {
+					lastCommentLine += 1;
+					isCode = false;
+					inComment = false;
+				} else if (lineNum == lastCommentLine + 1) {
 					blockText += text + "\n";
 					lastCommentLine += 1;
 					isCode = false;
-				} else if (text.charAt(0) == "=" || text.charAt(0) == "*") {
-					maybeAppendBlock();
-					firstCommentLine = lineNum;
-					lastCommentLine = lineNum;
-					blockText = text + "\n";
-					codeText = "";
-					isCode = false;
 				}
+			} else if (isStartComment) {
+				startIndex = line.indexOf("/**");
+				text = App.trim(line.slice(startIndex + 3));
+
+				maybeAppendBlock();
+				firstCommentLine = lineNum;
+				lastCommentLine = lineNum;
+				blockText = text + "\n";
+				codeText = "";
+				isCode = false;
+				inComment = true;
 			}
 			if (isCode)
 				codeText += line + "\r\n";
@@ -186,14 +209,16 @@ App.processCode = function processCode(code, div) {
 
 };
 
-// ** {{{ App.addMenuItem() }}} **
-//
-// Adds a menu item to the {{{element}}} DOM node showing the {{{label}}}
-// text.  If {{{urlOrCallback}}} is an URL, choosing the item causes a new
-// window to be opened with that URL.  If it's a function, it will be called
-// when choosing the item.
-//
-// If the node does not have a menu yet, one will be created.
+/**
+ * **`App.addMenuItem()`**
+ *
+ * Adds a menu item to the `element` DOM node showing the `label`
+ * text. If `urlOrCallback` is an URL, choosing the item causes a new
+ * window to be opened with that URL.  If it's a function, it will be called
+ * when choosing the item.
+ *
+ * If the node does not have a menu yet, one will be created.
+ */
 
 App.addMenuItem = function addMenuItem(element, label, urlOrCallback) {
 	var text = $(element).text();
@@ -251,11 +276,13 @@ App.currentPage = null;
 
 App.pages = {};
 
-// ** {{{ App.navigate() }}} **
-//
-// Navigates to a different view if needed.  The appropriate view is
-// fetched from the URL hash.  If that is empty, the original page content
-// is shown.
+/**
+ * **`App.navigate()`**
+ *
+ * Navigates to a different view if needed.  The appropriate view is
+ * fetched from the URL hash.  If that is empty, the original page content
+ * is shown.
+ */
 
 App.navigate = function navigate() {
 	var newPage;
