@@ -38,11 +38,11 @@
 
 /**
  * # App #
- *
+ */
+/**
  * This is the application that processes the code and lets the user
  * navigate through and read the documentation.
  */
-
 var App = {
 	options : {}
 };
@@ -52,7 +52,6 @@ var App = {
  *
  * Returns `str` without whitespace at the beginning and the end.
  */
-
 App.trim = function trim(str) {
 	return str.replace(/^\s+|\s+$/g,"");
 };
@@ -64,7 +63,6 @@ App.trim = function trim(str) {
  * argument, the DOM node containing the documentation.  User-defined
  * processor functions are called after standard processing is done.
  */
-
 App.processors = [];
 
 App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
@@ -81,7 +79,6 @@ App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
  *
  * Documentation is parsed using [Showdown](https://github.com/coreyti/showdown).
  */
-
 App.processCode = function processCode(code, div) {
 	var lines = code.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
 	var blocks = [];
@@ -98,13 +95,6 @@ App.processCode = function processCode(code, div) {
 						 numLines: lastCommentLine - firstCommentLine + 1,
 						 lastCode : _lineNum,
 						 code: codeText});
-		} else if(codeText){
-			blocks.push({text: "~ ",
-						 lineno: 0,
-						 numLines: 0,
-						 lastCode : _lineNum,
-						 code: codeText});
-
 		}
 	}
 
@@ -117,7 +107,6 @@ App.processCode = function processCode(code, div) {
 			var line = this;
 			var isCode = true;
 			var isStartComment = (App.trim(line).indexOf("/**") == 0);
-			console.log(line.indexOf("*/"));
 			var isEndComment = ~line.indexOf("*/");
 			if (inComment) {
 				text = App.trim(line);
@@ -171,22 +160,25 @@ App.processCode = function processCode(code, div) {
 					cont.push([titl.attr('id'), hd, titl]);
 				}
 			}
-			$(div).append(docs);
-			var num = $('<div class = "nums">');
-			for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
-				num.append(x + '\n');
-			}
-			$(div).append(num);
-			var code = $('<code class="code prettyprint">');
-			$(code).css(App.columnCss);
-			code.text(this.code);
-			$(div).append(code);
+			if (this.code.length) {
+				var code = $('<code class="code prettyprint">');
+				$(code).css(App.columnCss);
+				code.text(this.code);
+				$(div).append(code);
+				
+				var num = $('<div class = "nums">');
+				for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
+					num.append(x + '\n');
+				}
+				$(div).append(num);
 
-			var docsSurplus = docs.height() - code.height() + 1;
-			if (docsSurplus > 0){
-				code.css({paddingBottom: docsSurplus + "px"});
-				num.css({paddingBottom: docsSurplus + "px"})
+				var docsSurplus = docs.height() - code.height() + 1;
+				if (docsSurplus > 0){
+					code.css({paddingBottom: docsSurplus + "px"});
+					num.css({paddingBottom: docsSurplus + "px"})
+				}
 			}
+			$(div).append(docs);
 			$(div).append('<div class="divider">');
 		});
 
@@ -197,6 +189,7 @@ App.processCode = function processCode(code, div) {
 			App.processors[i]($(div).find(".documentation"));
 		});
 
+	/*
 	// == Table Of Contents ==
 	var ul = $("<ul class = 'toc' />");
 	for (var k in cont){
@@ -206,6 +199,7 @@ App.processCode = function processCode(code, div) {
 		ul.append(ln);
 	}
 	div.prepend(ul);
+	*/
 
 };
 
@@ -219,7 +213,6 @@ App.processCode = function processCode(code, div) {
  *
  * If the node does not have a menu yet, one will be created.
  */
-
 App.addMenuItem = function addMenuItem(element, label, urlOrCallback) {
 	var text = $(element).text();
 
@@ -283,7 +276,6 @@ App.pages = {};
  * fetched from the URL hash.  If that is empty, the original page content
  * is shown.
  */
-
 App.navigate = function navigate() {
 	var newPage;
 	if (window.location.hash)
@@ -303,12 +295,42 @@ App.navigate = function navigate() {
 					   {},
 					   function(code) {
 						   App.processCode(code, newDiv);
-						   prettyPrint();},
+						   prettyPrint();
+						   App.updateBreadcrumbs();
+					   },
 					   "text");
 		}
 		$(App.pages[newPage]).show();
 		App.currentPage = newPage;
+		App.updateBreadcrumbs();
 	}
+};
+
+App.updateBreadcrumbs = function updateBreadcrumbs()
+{
+	var breadcrumbsEl = $('#menubar .breadcrumbs');
+	breadcrumbsEl.html('');
+	var path = [{
+		label: $('title').text(),
+		link: ''
+	}];
+
+	if (App.currentPage != "overview") {
+		var label = App.pages[App.currentPage].find('h1').eq(0).text();
+		if (!label.length) label = App.pages[App.currentPage].attr('name');
+		path.push({
+			label: label,
+			link: App.pages[App.currentPage].attr('name')
+		});
+	}
+
+	$.each(path, function (index, value) {
+		var item = $('<li></li>').appendTo(breadcrumbsEl);
+		var link = $('<a></a>').appendTo(item);
+		link.attr('href', '#'+value.link);
+		link.text(value.label);
+		if (index == 0) link.addClass('root');
+	});
 };
 
 App.CHARS_PER_ROW = 80;
@@ -324,13 +346,22 @@ App.initColumnSizes = function initSizes() {
 	// Dynamically determine the column widths and padding based on
 	// the font size.
 	var padding = App.charWidth * 2;
-	App.columnCss = {width: App.columnWidth,
-					 paddingLeft: padding,
-					 paddingRight: padding};
-	$("#content").css({width: (App.columnWidth + padding*2) * 2 + (3*App.charWidth)});
-	$(".documentation").css(App.columnCss);
-	$(".code").css(App.columnCss);
-	$(".nums").css({width : 3*App.charWidth});
+	App.columnCss = {width: App.columnWidth};
+	var contentWidth = (App.columnWidth + padding*2) * 2 +
+		(3*App.charWidth);
+};
+
+App.initMenuBar = function initMenuBar() {
+	var outerEl = $('<div id="menubar_o"></div>').prependTo('body');
+	var menuBarEl = $('<div id="menubar"></div>').appendTo(outerEl);
+	var breadcrumbsEl = $('<ul class="breadcrumbs"></ul>').appendTo(menuBarEl);
+
+	breadcrumbsEl.find('a').live('click', function () {
+		console.log('test');
+		$('html, body').animate({scrollTop:0}, 1200, 'linear');
+	});
+
+	$('<div class="clear"></div>').appendTo(menuBarEl);
 };
 
 $(function() {
@@ -338,6 +369,7 @@ $(function() {
 		console.log(this);
 	});
 	App.pages["overview"] = $("#overview").get(0);
+	App.initMenuBar();
 	App.initColumnSizes();
 	window.setInterval(
 		function() {
