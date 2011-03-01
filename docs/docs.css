@@ -125,19 +125,18 @@ body {
 .documentation {
 	padding: 9px 1em;
 	font-size: 1em;
-}
-
-.documentation * {
-	margin: 0;
+	line-height: 1.48;
 }
 
 .documentation h1, .documentation h2 {
     font-weight: normal;
-	padding: 0;
+	margin: 0;
+	padding: 0.3em 0
 }
 
 .documentation p {
-	padding: 0;
+	margin: 0;
+	padding: 0.5em 0;
 }
 
 .nums, .code {
