@@ -174,14 +174,12 @@ App.processCode = function processCode(code, div) {
 			num.css(App.colNumCss);
 			num.insertBefore(docs);
 
-			console.log("before", docs.outerHeight(true), code.outerHeight(true));
 			var docsSurplus = docs.outerHeight(true) - code.outerHeight(true) + App.charHeight;
 			if (docsSurplus > 0){
 				code.css({paddingBottom: 9+docsSurplus + "px"});
 				num.css({paddingBottom: 9+docsSurplus + "px"})
 			}
 			$(div).append('<div class="divider">');
-			console.log("after", docs.outerHeight(true), code.outerHeight(true));
 		});
 
 	// Run the user-defined processors.
@@ -347,7 +345,7 @@ App.initColumnSizes = function initSizes() {
 	$(oneCodeCharacter).remove();
 
 	App.colCodeCss = {width: App.columnWidth};
-	App.colNumCss = {width: App.charWidth * 6};
+	App.colNumCss = {width: App.charWidth * 7};
 	App.colDocCss = {paddingRight: App.columnWidth + App.charWidth * 7 + 10};
 
 	$('.documentation').css(App.colDocCss);
