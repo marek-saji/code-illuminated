@@ -149,7 +149,7 @@ App.processCode = function processCode(code, div) {
 		blocks,
 		function(i) {
 			var docs = $('<div class="documentation">');
-			docs.css(App.columnCss);
+			docs.css(App.colDocCss);
 			docs.html(showdown.makeHtml(this.text));
 
 			for(var h in headers){
@@ -160,25 +160,24 @@ App.processCode = function processCode(code, div) {
 					cont.push([titl.attr('id'), hd, titl]);
 				}
 			}
-			if (this.code.length) {
-				var code = $('<code class="code prettyprint">');
-				$(code).css(App.columnCss);
-				code.text(this.code);
-				$(div).append(code);
-				
-				var num = $('<div class = "nums">');
-				for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
-					num.append(x + '\n');
-				}
-				$(div).append(num);
-
-				var docsSurplus = docs.height() - code.height() + 1;
-				if (docsSurplus > 0){
-					code.css({paddingBottom: docsSurplus + "px"});
-					num.css({paddingBottom: docsSurplus + "px"})
-				}
-			}
 			$(div).append(docs);
+			var code = $('<code class="code prettyprint">');
+			code.css(App.colCodeCss);
+			code.text(this.code);
+			code.insertBefore(docs);
+
+			var num = $('<div class = "nums">');
+			for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
+				num.append(x + '\n');
+			}
+			num.css(App.colNumCss);
+			num.insertBefore(docs);
+
+			var docsSurplus = docs.outerHeight(true) - code.outerHeight(true) + 15;
+			if (docsSurplus > 0){
+				code.css({paddingBottom: docsSurplus + "px"});
+				num.css({paddingBottom: docsSurplus + "px"})
+			}
 			$(div).append('<div class="divider">');
 		});
 
@@ -343,12 +342,13 @@ App.initColumnSizes = function initSizes() {
 	App.columnWidth = App.charWidth * App.CHARS_PER_ROW;
 	$(oneCodeCharacter).remove();
 
-	// Dynamically determine the column widths and padding based on
-	// the font size.
-	var padding = App.charWidth * 2;
-	App.columnCss = {width: App.columnWidth};
-	var contentWidth = (App.columnWidth + padding*2) * 2 +
-		(3*App.charWidth);
+	App.colCodeCss = {width: App.columnWidth};
+	App.colNumCss = {width: App.charWidth * 6};
+	App.colDocCss = {paddingRight: App.columnWidth + App.charWidth * 6};
+
+	$('.documentation').css(App.colDocCss);
+	$('.nums').css(App.colNumCss);
+	$('.code').css(App.colCodeCss);
 };
 
 App.initMenuBar = function initMenuBar() {
