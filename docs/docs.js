@@ -103,7 +103,6 @@ App.processCode = function processCode(code, div) {
 		lines,
 		function(lineNum) {
 			var startIndex, text;
-			_lineNum = lineNum;
 			var line = this;
 			var isCode = true;
 			var isStartComment = (App.trim(line).indexOf("/**") == 0);
@@ -137,6 +136,8 @@ App.processCode = function processCode(code, div) {
 			}
 			if (isCode)
 				codeText += line + "\r\n";
+
+			_lineNum = lineNum + 1;
 		});
 	maybeAppendBlock();
 
@@ -168,17 +169,19 @@ App.processCode = function processCode(code, div) {
 
 			var num = $('<div class = "nums">');
 			for (var x = this.lineno + this.numLines +1; x<this.lastCode; x++){
-				num.append(x + '\n');
+				num.append(x + ' \n');
 			}
 			num.css(App.colNumCss);
 			num.insertBefore(docs);
 
-			var docsSurplus = docs.outerHeight(true) - code.outerHeight(true) + 15;
+			console.log("before", docs.outerHeight(true), code.outerHeight(true));
+			var docsSurplus = docs.outerHeight(true) - code.outerHeight(true) + App.charHeight;
 			if (docsSurplus > 0){
-				code.css({paddingBottom: docsSurplus + "px"});
-				num.css({paddingBottom: docsSurplus + "px"})
+				code.css({paddingBottom: 9+docsSurplus + "px"});
+				num.css({paddingBottom: 9+docsSurplus + "px"})
 			}
 			$(div).append('<div class="divider">');
+			console.log("after", docs.outerHeight(true), code.outerHeight(true));
 		});
 
 	// Run the user-defined processors.
@@ -339,12 +342,13 @@ App.initColumnSizes = function initSizes() {
 	var oneCodeCharacter = $('<div class="code">M</div>');
 	$("#content").append(oneCodeCharacter);
 	App.charWidth = oneCodeCharacter.width();
+	App.charHeight = oneCodeCharacter.height();
 	App.columnWidth = App.charWidth * App.CHARS_PER_ROW;
 	$(oneCodeCharacter).remove();
 
 	App.colCodeCss = {width: App.columnWidth};
 	App.colNumCss = {width: App.charWidth * 6};
-	App.colDocCss = {paddingRight: App.columnWidth + App.charWidth * 6};
+	App.colDocCss = {paddingRight: App.columnWidth + App.charWidth * 7 + 10};
 
 	$('.documentation').css(App.colDocCss);
 	$('.nums').css(App.colNumCss);

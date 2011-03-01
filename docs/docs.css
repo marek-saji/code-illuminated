@@ -3,7 +3,7 @@ html {
 }
 
 body {
-    font-family: palatino, palatino linotype, georgia, serif;
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
     text-align: center;
 	margin: 54px 0 0;
 }
@@ -123,8 +123,8 @@ body {
 }
 
 .documentation {
-    line-height: 1.4em;
-	padding: 0 1em;
+	padding: 9px 1em;
+	font-size: 1em;
 }
 
 .documentation * {
@@ -133,32 +133,34 @@ body {
 
 .documentation h1, .documentation h2 {
     font-weight: normal;
-    line-height: 1.4em;
-	padding: 1em 0 0.5em;
+	padding: 0;
 }
 
 .documentation p {
-	padding: 4px 0;
+	padding: 0;
+}
+
+.nums, .code {
+	margin: 0;
+	padding: 0;
+    white-space: pre;
+    font-size: 75%;
+    background-color: #f0f0f0;
 }
 
 .nums {
-    font-family: consolas, monaco, andale mono, monospace;
+    font-family: Monaco, Consolas, "Lucida Console", monospace;
     float:right;
-    white-space: pre;
-    font-size: 70%;
-    background-color: #f0f0f0;
-    margin:0;
-    color:#999;
-	padding: 0 0 0 10px;
+    color: #ccc;
 	margin: 0 0 0 5px;
+	padding: 9px 0 0;
+	text-align: right;
 }
 .code {
-    font-family: consolas, monaco, andale mono, monospace;
+    font-family: Monaco, Consolas, "Lucida Console", monospace;
     float: right;
 	clear: right;
-    white-space: pre;
-    font-size: 70%;
-    background-color: #f0f0f0;
+	padding: 9px 0 0;
 }
 
 .divider {
