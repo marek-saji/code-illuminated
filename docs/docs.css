@@ -136,7 +136,7 @@ body {
 
 .documentation p {
 	margin: 0;
-	padding: 0.5em 0;
+	padding: 0 0 1em;
 }
 
 .nums, .code {
@@ -152,14 +152,14 @@ body {
     float:right;
     color: #ccc;
 	margin: 0 0 0 5px;
-	padding: 9px 0 0;
+	padding: 14px 0 0;
 	text-align: right;
 }
 .code {
     font-family: Monaco, Consolas, "Lucida Console", monospace;
     float: right;
 	clear: right;
-	padding: 9px 0 0;
+	padding: 14px 0 0;
 }
 
 .divider {
