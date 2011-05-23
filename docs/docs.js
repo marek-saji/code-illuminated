@@ -295,7 +295,8 @@ App.navigate = function navigate() {
 					   {},
 					   function(code) {
 						   App.processCode(code, newDiv);
-						   prettyPrint();
+						   if (typeof prettyPrint != "undefined")
+						      prettyPrint();
 						   App.updateBreadcrumbs();
 					   },
 					   "text");
