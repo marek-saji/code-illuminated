@@ -133,10 +133,24 @@ body {
 	margin: 0;
 	padding: 0.3em 0
 }
+.documentation h1, .documentation h2, .documentation h3, .documentation h4, .documentation h5, .documentation h6 {
+    margin-top: 0;
+    padding-top: 0;
+}
 
 .documentation p {
 	margin: 0;
 	padding: 0 0 1em;
+}
+.documentation ol, .documentation ul {
+	margin: 0;
+	padding: 0 0 1em 2em;
+}
+
+.documentation pre {
+	overflow: auto;
+	overflow-x: auto;
+	overflow-y: visible;
 }
 
 .nums, .code {

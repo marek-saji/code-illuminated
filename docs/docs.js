@@ -77,7 +77,16 @@ App.menuItems = {};   // Has a {label, urlOrCallback} dict for each keyword.
  *     <div class="code"> (...) </div>
  *     <div class="divider"/>
  *
- * Documentation is parsed using [Showdown](https://github.com/coreyti/showdown).
+ * There are three supported ways of parsing documentation,
+ * first working is used:
+ *
+ * 1. [Markdown] using [Showdown]
+ * 2. [Creole]
+ * 3. as fallback, documentation is rendered in `<pre>` tags.
+ *
+ * [Markdown]: http://daringfireball.net/projects/markdown/
+ * [Showdown]: https://github.com/coreyti/showdown
+ * [Creole]:   http://www.wikicreole.org/wiki/
  */
 App.processCode = function processCode(code, div) {
 	var lines = code.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
@@ -87,6 +96,7 @@ App.processCode = function processCode(code, div) {
 	var firstCommentLine;
 	var lastCommentLine;
 	var _lineNum;
+	var renderDoc; // parsed docblock text rendering function
 
 	function maybeAppendBlock() {
 		if (blockText){
@@ -141,7 +151,37 @@ App.processCode = function processCode(code, div) {
 		});
 	maybeAppendBlock();
 
-	var showdown = new Showdown.converter();
+	if (typeof Showdown != "undefined")
+	{
+		var showdown = new Showdown.converter();
+		renderDoc = function (output, text)
+		{
+			output.html(showdown.makeHtml(text));
+		}
+	}
+	else if (typeof Parse != "undefined" && typeof Parse.Simple != "undefined" && typeof Parse.Simple.Creole != "undefined")
+	{
+		var creole = new Parse.Simple.Creole(
+		{
+			forIE: document.all,
+			interwiki: {
+				WikiCreole: 'http://www.wikicreole.org/wiki/',
+				Wikipedia: 'http://en.wikipedia.org/wiki/'
+			},
+			linkFormat: ''
+		});
+		renderDoc = function (output, text)
+		{
+			creole.parse(output.get(0), text);
+		}
+	}
+	else
+	{
+		renderDoc = function (output, text)
+		{
+			$('<pre />', {text: text}).wrap('<div />').appendTo(output);
+		}
+	}
 
 	var cont = [];
 	var headers = ['h1', 'h2', 'h3', 'h4', "strong"];
@@ -151,7 +191,7 @@ App.processCode = function processCode(code, div) {
 		function(i) {
 			var docs = $('<div class="documentation">');
 			docs.css(App.colDocCss);
-			docs.html(showdown.makeHtml(this.text));
+			renderDoc(docs, this.text);
 
 			for(var h in headers){
 				var hd = headers[h];
