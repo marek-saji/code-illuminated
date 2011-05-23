@@ -157,7 +157,7 @@ App.processCode = function processCode(code, div) {
 				var hd = headers[h];
 				if (docs.find(hd).length > 0){
 					var titl = docs.find(hd)
-					titl.attr('id', titl.text().replace(" ", "_"));
+					titl.attr('id', titl.text().replace(/ /g, "_"));
 					cont.push([titl.attr('id'), hd, titl]);
 				}
 			}
